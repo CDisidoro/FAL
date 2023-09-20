@@ -6,4 +6,4 @@ Lo más importante que se encontrará en este repositorio son ejercicios de la a
 
 La mayor parte de ejercicios se corresponderán con ejercicios de Acepta el Reto, pero también podrían haber ejercicios de examen.
 
-También se encontrará casi a final del cuatrimestre un resumen teórico de la asignatura con los conceptos más importantes a tener en cuenta y que podrían ser útiles para el test eliminatorio previo al examen final.
+También se encontrarán ocasionalmente ejemplos de cuestiones teóricas que puedan ayudar a estudiar para el test eliminatorio
