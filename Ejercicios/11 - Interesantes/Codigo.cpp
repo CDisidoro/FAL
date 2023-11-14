@@ -22,6 +22,7 @@ DISEÑO DEL ALGORITMO:
 ANALISIS DE LA COMPLEJIDAD:
 -- Determina justificadamente el orden de complejidad del algoritmo diseñado.
 -- Escribe y resuelve las ecuaciones de recurrencia.
+    n es el numero que estamos operando
     T(n) = C0 (Caso Base, n <= 9)
     T(n) = C1 + T(n/10) (Caso Recursivo, n > 9)
     a = 1
@@ -31,11 +32,11 @@ ANALISIS DE LA COMPLEJIDAD:
     a = b^k
     Complejidad O(n^k log n) = O(n^0 log n) = O(log n)
 */
-bool esDivisor(int digito, long long int valor){
+bool esDivisor(const int &digito, const long long int &valor){
     return (digito != 0) && (valor % digito == 0);
 }
 
-bool es_interesante_aux(unsigned int n, bool &interesante, long long int &sumDerecha,long long int &sumIzquierda){
+pair<bool, int> es_interesante_aux(const unsigned int &n, const long long int &sumDerecha){
     //Caso Base
     /*Para este caso si solo tenemos un digito, si ese digito no es cero y la suma de 
     todo lo que este a la derecha de ese digito es divisible por este, acumulara el digito
@@ -43,32 +44,22 @@ bool es_interesante_aux(unsigned int n, bool &interesante, long long int &sumDer
     En caso contrario determinara que no lo es y las recursiones terminaran dando false*/
     if(n <= 9){
         if(esDivisor(n, sumDerecha)){
-            sumIzquierda = n;
-            interesante = true;
+            return {true, n};
         }else{
-            sumIzquierda = 0;
-            interesante = false;
+            return {false, n};
         }
     }else{ //Caso Recursivo
-        sumDerecha = sumDerecha + (n % 10);
-        es_interesante_aux(n / 10, interesante, sumDerecha, sumIzquierda);
-        if(interesante && (n % 10) != 0){
-            if(esDivisor(n % 10, sumDerecha) && esDivisor(n % 10, sumIzquierda) ){
-                sumIzquierda = sumIzquierda + (n % 10);
-                interesante = true;
-            }
+        auto next = es_interesante_aux(n / 10, sumDerecha + (n % 10));
+        if(!next.first || !esDivisor(n%10, sumDerecha) || !esDivisor(n%10, next.second)){
+            return {false, 0};
         }else{
-            sumIzquierda = 0;
-            interesante = false;
+            return {true, next.second + (n % 10)};
         }
     }
-    return interesante;
 }
 
-bool es_interesante(unsigned int n) {
-	bool interesante;
-    long long int sumIzquierda, sumDerecha;
-    return es_interesante_aux(n, interesante, sumDerecha, sumIzquierda);
+bool es_interesante(const unsigned int &n) {
+    return es_interesante_aux(n, 0).first;
 }
 
 void ejecuta_caso() {
