@@ -31,15 +31,18 @@ ANALISIS DE LA COMPLEJIDAD:
     a = b^k
     Complejidad O(n^k log n) = O(n^0 log n) = O(log n)
 */
+bool esDivisor(int digito, long long int valor){
+    return (digito != 0) && (valor % digito == 0);
+}
 
-bool es_interesante_aux(unsigned int n, bool &interesante, int &sumDerecha, int &sumIzquierda){
+bool es_interesante_aux(unsigned int n, bool &interesante, long long int &sumDerecha,long long int &sumIzquierda){
     //Caso Base
     /*Para este caso si solo tenemos un digito, si ese digito no es cero y la suma de 
     todo lo que este a la derecha de ese digito es divisible por este, acumulara el digito
     a la suma izquierda y determinara que el numero es interesante.
     En caso contrario determinara que no lo es y las recursiones terminaran dando false*/
     if(n <= 9){
-        if(n != 0 && sumDerecha % n == 0){
+        if(esDivisor(n, sumDerecha)){
             sumIzquierda = n;
             interesante = true;
         }else{
@@ -47,26 +50,16 @@ bool es_interesante_aux(unsigned int n, bool &interesante, int &sumDerecha, int 
             interesante = false;
         }
     }else{ //Caso Recursivo
-        /*A medida que vamos reduciendo el numero vamos comprobando la parte derecha del numero.
-        Si el digito es cero o la suma de la parte derecha no es divisible por el digito, harcodea
-        la suma izquierda a cero y retorna interesante como falso.*/
-        if((n % 10) == 0 || sumDerecha % (n % 10) != 0){
+        sumDerecha = sumDerecha + (n % 10);
+        es_interesante_aux(n / 10, interesante, sumDerecha, sumIzquierda);
+        if(interesante && (n % 10) != 0){
+            if(esDivisor(n % 10, sumDerecha) && esDivisor(n % 10, sumIzquierda) ){
+                sumIzquierda = sumIzquierda + (n % 10);
+                interesante = true;
+            }
+        }else{
             sumIzquierda = 0;
             interesante = false;
-        }else{
-            /*En caso contrario acumula a la suma derecha el digito evaluado, hara la llamada recursiva
-            y revisara si una vez hecha la recursion el numero es interesante, el digito a revisar no es cero y
-            que la suma izquierda sea divisible por el digito. Si se cumple el caso, acumula el digito a la suma izquierda
-            y pone interesante como true. Sino, sera false y harcodea suma izquierda a cero*/
-            sumDerecha = sumDerecha + (n % 10);
-            es_interesante_aux(n / 10, interesante, sumDerecha, sumIzquierda);
-            if(interesante && (n % 10) != 0 && (sumIzquierda % (n % 10) == 0) ){
-                sumIzquierda += (n % 10);
-                interesante = true;
-            }else{
-                sumIzquierda = 0;
-                interesante = false;
-            }
         }
     }
     return interesante;
@@ -74,7 +67,7 @@ bool es_interesante_aux(unsigned int n, bool &interesante, int &sumDerecha, int 
 
 bool es_interesante(unsigned int n) {
 	bool interesante;
-    int sumDerecha, sumIzquierda;
+    long long int sumIzquierda, sumDerecha;
     return es_interesante_aux(n, interesante, sumDerecha, sumIzquierda);
 }
 
