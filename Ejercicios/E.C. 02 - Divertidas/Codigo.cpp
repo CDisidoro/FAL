@@ -60,15 +60,26 @@ typedef struct{
         }
         return {true, numCaballero, numDragon, numPrincesa};
     CASO RECURSIVO ((fin - ini) > 0): //Hay mas de dos personajes
+        tSol mitadInf = {true, 0, 0, 0}, mitadSup = {true, 0, 0, 0};
         int medio = (fin + ini) / 2;
+        if(ini != medio){ //Se limita que no se pueda salir de el segmento que le toca
         mitadInf = es_divertida_aux(p, ini, medio - 1);
+        }
+        if(fin != medio){
         mitadSup = es_divertida_aux(p, medio + 1, fin);
-        esDivertido = ( (mitadInf.numDragon > mitadSup.numCaballero && p[medio] == CABALLERO) || 
-                           (mitadInf.numDragon == mitadSup.numCaballero && p[medio] == PRINCESA) ||
-                           (mitadInf.numDragon < mitadSup.numCaballero && 
-                                (mitadInf.numPrincesa + mitadSup.numPrincesa > 0 && p[medio] == DRAGON) ||
-                                (mitadInf.numPrincesa + mitadSup.numPrincesa == 0 && p[medio] == PRINCESA) )
-                            && (mitadInf.divertido && mitadSup.divertido) );
+        }
+        if(mitadInf.numDragon > mitadSup.numCaballero){
+            esDivertido = p[medio] == CABALLERO;
+        }else if(mitadInf.numDragon == mitadSup.numCaballero){
+            esDivertido = p[medio] == PRINCESA;
+        }else if(mitadInf.numDragon < mitadSup.numCaballero){
+            if(mitadInf.numPrincesa + mitadSup.numPrincesa > 0){
+                esDivertido = p[medio] == DRAGON;
+            }else if(mitadInf.numPrincesa + mitadSup.numPrincesa == 0){
+                esDivertido = p[medio] == PRINCESA;
+            }
+        }
+        esDivertido = esDivertido && (mitadInf.divertido && mitadSup.divertido);
         numCaballero = mitadInf.numCaballero + mitadSup.numCaballero;
         numDragon = mitadInf.numDragon + mitadSup.numDragon;
         numPrincesa = mitadInf.numPrincesa + mitadSup.numPrincesa;
@@ -87,7 +98,7 @@ typedef struct{
 (3) TERMINACION: 
     fin - ini, porque estamos filtrando casos y reduciendo fin o aumentando ini hasta que seran iguales y llegan al caso base
 (4) IMPLEMENTACION POR INMERSION DEL ALGORITMO, SI PROCEDE:
-
+    es_divertida_aux(personaje[], 0, n - 1);
 (5) DETERMINACION DEL COSTE DEL ALGORITMO EN EL PEOR CASO:
     T(0) = C0, (fin - ini <= 0)
     T(n) = C1 + 2T(n/2)
@@ -99,8 +110,8 @@ typedef struct{
     O(n^log_2 2) = O(n)
 */
 tSol es_divertida_aux(tPersonaje p[], int ini, int fin){
-    bool esDivertido;
-    int numCaballero, numDragon, numPrincesa;
+    bool esDivertido = false;
+    int numCaballero = 0, numDragon = 0, numPrincesa = 0;
     if((fin - ini) <= 0){
         switch(p[ini]){
             case CABALLERO:
@@ -121,16 +132,26 @@ tSol es_divertida_aux(tPersonaje p[], int ini, int fin){
         }
         return {true, numCaballero, numDragon, numPrincesa};
     }else{
-        tSol mitadInf, mitadSup;
+        tSol mitadInf = {true, 0, 0, 0}, mitadSup = {true, 0, 0, 0};
         int medio = (fin + ini) / 2;
+        if(ini != medio){
         mitadInf = es_divertida_aux(p, ini, medio - 1);
+        }
+        if(fin != medio){
         mitadSup = es_divertida_aux(p, medio + 1, fin);
-        esDivertido = ( (mitadInf.numDragon > mitadSup.numCaballero && p[medio] == CABALLERO) || 
-                           (mitadInf.numDragon == mitadSup.numCaballero && p[medio] == PRINCESA) ||
-                           (mitadInf.numDragon < mitadSup.numCaballero && 
-                                (mitadInf.numPrincesa + mitadSup.numPrincesa > 0 && p[medio] == DRAGON) ||
-                                (mitadInf.numPrincesa + mitadSup.numPrincesa == 0 && p[medio] == PRINCESA) )
-                            && (mitadInf.divertido && mitadSup.divertido) );
+        }
+        if(mitadInf.numDragon > mitadSup.numCaballero){
+            esDivertido = p[medio] == CABALLERO;
+        }else if(mitadInf.numDragon == mitadSup.numCaballero){
+            esDivertido = p[medio] == PRINCESA;
+        }else if(mitadInf.numDragon < mitadSup.numCaballero){
+            if(mitadInf.numPrincesa + mitadSup.numPrincesa > 0){
+                esDivertido = p[medio] == DRAGON;
+            }else if(mitadInf.numPrincesa + mitadSup.numPrincesa == 0){
+                esDivertido = p[medio] == PRINCESA;
+            }
+        }
+        esDivertido = esDivertido && (mitadInf.divertido && mitadSup.divertido);
         numCaballero = mitadInf.numCaballero + mitadSup.numCaballero;
         numDragon = mitadInf.numDragon + mitadSup.numDragon;
         numPrincesa = mitadInf.numPrincesa + mitadSup.numPrincesa;
