@@ -28,10 +28,10 @@ using namespace std;
 	acotar(etapas, n, min, max, repostajes_permitidos)
 	min_capacidad_aux(etapas, n, min, max, repostajes_permitidos)
 (5) DETERMINACION DEL COSTE DEL ALGORITMO EN EL PEOR CASO:
-	T(n) = n * C0 (Base)
-	T(n) = C1 + T(n/2) (Caso Recursivo)
-		w(n) = O(n)
-	La complejidad, por lo tanto es O(n^2)
+	T(1, u) = C0 (Base)
+	T(n, u) = w(u) + T(n/2) (Caso Recursivo)
+		w(n) = O(n) => w(n) comprueba si la cantidad de combustible es factible para solucionar el problema
+	La complejidad, por lo tanto es O(u log n)
 */
 
 bool comprueba_combustible(int etapas[], int n, int combustible, int rep) {
