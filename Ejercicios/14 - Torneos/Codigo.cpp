@@ -41,14 +41,10 @@ a partir de los devueltos por la generalizacion.
 	Tras acotar el minimo y maximo de poder, se llama a la generalizacion
 	Esta va modificando minP y maxP para obtener el poder minimo para ganar
 (4) Analisis de la complejidad del algoritmo
-	T(n) = n * C0 (Caso Base)
-	T(n) = C1 + T(n/2) (Caso Recursivo)
-	a = 1 (Dividimos el problema en 1 subproblema)
-	b = 2 (Dividimos el problema a la mitad)
-	k = 1
-	b^k = 2
-	a < b^k
-	O(n^k) = O(n^2)
+	T(1, u) = C0 (Base)
+	T(n, u) = w(u) + T(n/2) (Caso Recursivo)
+		w(n) = O(n) => w(n) comprueba si la cantidad de poder es factible para solucionar el problema
+	La complejidad, por lo tanto es O(u log n)
 */
 bool vence(int enemigos[], int n, int max_duelos, int poder){
 	int i = 0, combate = 1, suma = 0;
