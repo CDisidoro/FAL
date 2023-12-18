@@ -177,12 +177,12 @@ void reparte_aux(const tEntrada& entrada, tDatos& datos, int monedaActual, int& 
 			reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
 			quitaAPirata(entrada, datos, monedaActual, 2);//Restaura al estado anterior
 		}else{
-			if(datos.numMonedasPirata1 <= entrada.num_monedas/2){
+			if(datos.numMonedasPirata1 <= entrada.num_monedas/2){ //Pirata 1 aun no llega a tener la mitad de monedas totales
 				agregaAPirata(entrada, datos, monedaActual, 1);//Agregar moneda a pirata 1
 				reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
 				quitaAPirata(entrada, datos, monedaActual, 1);//Restaura al estado anterior
 			}
-			if(datos.numMonedasPirata2 <= entrada.num_monedas/2){
+			if(datos.numMonedasPirata2 <= entrada.num_monedas/2){ // Pirata 2 aun no llega a tener la mitad de monedas totales
 				agregaAPirata(entrada, datos, monedaActual, 2);//Agregar moneda a pirata 2
 				reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
 				quitaAPirata(entrada, datos, monedaActual, 2);//Restaura al estado anterior
