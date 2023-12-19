@@ -18,8 +18,6 @@ typedef struct{
 	int numMonedasPirata2;
 	int valorPirata1;
 	int valorPirata2;
-	int monedasPirata1[MAX_MONEDAS/2];
-	int monedasPirata2[MAX_MONEDAS/2];
 }tDatos;
 /*
 (1) Como son las soluciones parciales viables de este problema?
@@ -57,47 +55,26 @@ typedef struct{
 	int num_formas: Numero de formas de repartir el botin con la diferencia de valor minima
 (7) Analisis de casos: casos base, casos recursivos
 	Caso Base:
-		if((datos.monedasPîrata1 + datos.numMonedasPirata2) == entrada.num_monedas){
-			if(abs(datos.valorPirata1 - datos.valorPirata2) == min_diff){
+		if((datos.numMonedasPirata1 + datos.numMonedasPirata2) == entrada.num_monedas){ //Si ya se han repartido todas las monedas
+		if(datos.numMonedasPirata1 >= entrada.min_monedas && datos.numMonedasPirata2 >= entrada.min_monedas){ //Si los dos piratas tienen el minimo de monedas
+			if(abs(datos.valorPirata1 - datos.valorPirata2) == min_dif){ //La diferencia de valores es igual a la diferencia minima
 				num_formas++;
-			}else if(abs(datos.valorPirata1 - datos.valorPirata2) < min_diff){
-				min_diff = abs(datos.valorPirata1 - datos.valorPirata2);
+			}else if(abs(datos.valorPirata1 - datos.valorPirata2) < min_dif){ //Hay nueva diferencia minima -> Se actualiza la dif. minima y resetea el contador de soluciones
+				min_dif = abs(datos.valorPirata1 - datos.valorPirata2);
 				num_formas = 1;
 			}
 		}
+	}
 	Caso Recursivo:
 		else{
-			for(int i = (datos.monedasPîrata1 + datos.numMonedasPirata2); i < num_monedas; i++){
-				if(datos.numMonedasPirata1 - datos.numMonedasPirata2 == 0){
-					//Agregar moneda a pirata 1
-						datos.numMonedasPirata1++;
-						datos.valorPîrata1 += entrada.valor_monedas[i];
-						reparte_aux(entrada, datos, min_diff, num_formas);
-						datos.numMonedasPirata1--;
-						datos.valorPîrata1 -= entrada.valor_monedas[i];
-					//Agregar moneda a pirata 2
-						datos.numMonedasPirata2++;
-						datos.valorPîrata2 += entrada.valor_monedas[i];
-						reparte_aux(entrada, datos, min_diff, num_formas);
-						datos.numMonedasPirata2--;
-						datos.valorPîrata2 -= entrada.valor_monedas[i];
-				}else{
-					if(datos.numMonedasPirata1 > datos.numMonedasPirata2){
-						datos.numMonedasPirata2++;
-						datos.valorPîrata2 += entrada.valor_monedas[i];
-						reparte_aux(entrada, datos, min_diff, num_formas);
-						datos.numMonedasPirata2--;
-						datos.valorPîrata2 -= entrada.valor_monedas[i];
-					}else{
-						datos.numMonedasPirata1++;
-						datos.valorPîrata1 += entrada.valor_monedas[i];
-						reparte_aux(entrada, datos, min_diff, num_formas);
-						datos.numMonedasPirata1--;
-						datos.valorPîrata1 -= entrada.valor_monedas[i];
-					}
-				}
-			}
-		}
+            agregaAPirata(entrada, datos, monedaActual, 1);//Agregar moneda a pirata 1
+            reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
+            quitaAPirata(entrada, datos, monedaActual, 1);//Restaura al estado anterior
+			
+            agregaAPirata(entrada, datos, monedaActual, 2);//Agregar moneda a pirata 2
+            reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
+            quitaAPirata(entrada, datos, monedaActual, 2);//Restaura al estado anterior
+	}
 (8) Si el algoritmo utiliza una generalizacion, describe como se implementa el algoritmo
     en terminos de la misma (inmersion)
 	min_diff = sumMonedas(entrada);
@@ -112,11 +89,9 @@ typedef struct{
 
 void agregaAPirata(const tEntrada& entrada, tDatos& datos, int pos, int pirata){
 	if(pirata == 1){
-		datos.monedasPirata1[datos.numMonedasPirata1] = pos;
 		datos.numMonedasPirata1++;
 		datos.valorPirata1 += entrada.valor_monedas[pos];
 	}else if(pirata == 2){
-		datos.monedasPirata2[datos.numMonedasPirata2] = pos;
 		datos.numMonedasPirata2++;
 		datos.valorPirata2 += entrada.valor_monedas[pos];
 	}
@@ -126,26 +101,10 @@ void quitaAPirata(const tEntrada& entrada, tDatos& datos, int pos, int pirata){
 	if(pirata == 1){
 		datos.numMonedasPirata1--;
 		datos.valorPirata1 -= entrada.valor_monedas[pos];
-		datos.monedasPirata1[datos.numMonedasPirata1] = -1;
 	}else if(pirata == 2){
 			datos.numMonedasPirata2--;
 			datos.valorPirata2 -= entrada.valor_monedas[pos];
-			datos.monedasPirata2[datos.numMonedasPirata2] = -1;
 	}
-}
-
-bool monedaYaAgregada(const tEntrada& entrada, tDatos& datos, int pos){
-	for(int i = 0; i < datos.numMonedasPirata1; i++){
-		if(datos.monedasPirata1[i] == pos){ //Si el pirata 1 tiene la moneda devuelve true
-			return true;
-		}
-	}
-	for(int i = 0; i < datos.numMonedasPirata2; i++){
-		if(datos.monedasPirata2[i] == pos){ //Si el pirat 2 tiene la moneda devuelve true
-			return true;
-		}
-	}
-	return false; //Si no se encuentra la moneda devuelve false
 }
 
 int sumMonedas(const tEntrada& entrada){ //Acota el valor minimo de suma para el inicio
@@ -167,27 +126,16 @@ void reparte_aux(const tEntrada& entrada, tDatos& datos, int monedaActual, int& 
 			}
 		}
 	}else{
-		if(datos.numMonedasPirata1 == datos.numMonedasPirata2){ //Tienen la misma cantidad de monedas
-			//Prueba la combinacion para el pirata 1
-			agregaAPirata(entrada, datos, monedaActual, 1);//Agregar moneda a pirata 1
-			reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
-			quitaAPirata(entrada, datos, monedaActual, 1);//Restaura al estado anterior
-			//Prueba la combinacion para el pirata 2
-			agregaAPirata(entrada, datos, monedaActual, 2);//Agregar moneda a pirata 2
-			reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
-			quitaAPirata(entrada, datos, monedaActual, 2);//Restaura al estado anterior
-		}else{
-			if(datos.numMonedasPirata1 <= entrada.num_monedas/2){ //Pirata 1 aun no llega a tener la mitad de monedas totales
-				agregaAPirata(entrada, datos, monedaActual, 1);//Agregar moneda a pirata 1
-				reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
-				quitaAPirata(entrada, datos, monedaActual, 1);//Restaura al estado anterior
-			}
-			if(datos.numMonedasPirata2 <= entrada.num_monedas/2){ // Pirata 2 aun no llega a tener la mitad de monedas totales
-				agregaAPirata(entrada, datos, monedaActual, 2);//Agregar moneda a pirata 2
-				reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
-				quitaAPirata(entrada, datos, monedaActual, 2);//Restaura al estado anterior
-			}
-		}
+        //if(datos.numMonedasPirata1 <= entrada.num_monedas/2){ //Pirata 1 aun no llega a tener la mitad de monedas totales
+            agregaAPirata(entrada, datos, monedaActual, 1);//Agregar moneda a pirata 1
+            reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
+            quitaAPirata(entrada, datos, monedaActual, 1);//Restaura al estado anterior
+        //}
+        //if(datos.numMonedasPirata2 <= entrada.num_monedas/2){ // Pirata 2 aun no llega a tener la mitad de monedas totales
+            agregaAPirata(entrada, datos, monedaActual, 2);//Agregar moneda a pirata 2
+            reparte_aux(entrada, datos, monedaActual + 1, min_dif, num_formas);
+            quitaAPirata(entrada, datos, monedaActual, 2);//Restaura al estado anterior
+        //}
 	}
 }
 
