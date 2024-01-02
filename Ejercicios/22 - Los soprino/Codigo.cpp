@@ -1,15 +1,11 @@
 /*
-NOMBRE Y APELLIDOS:
-Nº USUARIO DOMJUDGE:
+NOMBRE Y APELLIDOS: Camilo Andres D'isidoro
+Nº USUARIO DOMJUDGE: FAL034
 */
 #include <iostream>
-
 using namespace std;
-
 const int MAX_PERSONAS = 20;
 const int MAX_VEHICULOS = 10;
-
-
 // Datos de entrada
 typedef struct {
 	bool ha_bebido[MAX_PERSONAS];   // ha_bebido[i]: La persona i ha bebido
@@ -17,34 +13,130 @@ typedef struct {
 	int n_personas;                 // Nº total de personas en el clan
 	int n_vehiculos;                // Nº total de vehículos
 } tDatos;
-
 /*
 (1) En caso de utilizar una generalización, indicar su parámetros, y explicar para que
 sirven cada uno de ellos
-
+	posVehiculo (Entrada): Numero de vehiculo en el que estamos alojando personas
+	posPersona (Entrada): Posicion de la siguiente persona a asignar y controlar que llegamos al final de la lista de personas
+	sobrios[] (Entrada): Cantidad de sobrios en el vehiculo X
+	ebrios[] (Entrada): Cantidad de ebrios en el vehiculo X
+	asignaciones[] (Entrada): Lista de asignaciones (asignaciones[X] = Y => La persona X esta en el vehiculo Y)
+	soluciones (Salida): Cantidad de soluciones posibles
 (2) ¿Cómo son las soluciones parciales de este problema?
-
+	Una lista de asignaciones de personas a vehiculos donde no hemos terminado de asignar a todas las personas y vehiculos
 (3) ¿Cuándo una solución parcial es viable?
-
+	Cuando al asignar una persona nueva al vehiculo se cumple que:
+		- La cantidad de ebrios no supera la mitad de capacidad del vehiculo
 (4) ¿Cuándo una solución parcial es una solución final al problema?
-
+	Cuando todos los vehiculos tienen pasajeros, entre ellos una persona sobria, y la cantidad de ebrios no supera la mitad de capacidad del vehiculo,
+	asi como todas las personas van en vehiculos
 (5) Dada una solución parcial, ¿cómo se generan las siguientes soluciones
 parciales viables?
-
+	Si hay capacidad para alojar un pasajero mas en el vehiculo, recorrera la lista de personas en busca de una no asignada para añadirla al vehiculo (Validando el limite de ebrios si esta ebrio).
+	Y también se plantea no alojar el pasajero en el vehiculo X sino que lo movemos al X+1, haya espacio o no en el vehiculo X
 (6) Análisis de casos
 	(6.1) Caso(s) base
-
+		if (posVehiculo == datos.n_vehiculos || posPersona == datos.n_personas) {
+			if (esViable(datos, solucion)) {
+				soluciones++;
+			}
+		}
 	(6.2) Caso(s) recursivos
-
+		else {
+			int puestosOcupados = solucion.sobrios[posVehiculo] + solucion.ebrios[posVehiculo];
+			if (puestosOcupados + 1 <= datos.capacidad[posVehiculo]) {
+				for (int persona = 0; persona < datos.n_personas; persona++) {
+					if (solucion.asignaciones[persona] == -1) {
+						if (datos.ha_bebido[persona] && solucion.ebrios[posVehiculo] + 1 <= (datos.capacidad[posVehiculo] / 2)) {
+							solucion.ebrios[posVehiculo]++;
+							solucion.asignaciones[persona] = posVehiculo;
+							solve(datos, solucion, posVehiculo, posPersona + 1, soluciones);
+							solucion.asignaciones[persona] = -1;
+							solucion.ebrios[posVehiculo]--;
+						}
+						else if (!datos.ha_bebido[persona]) {
+							solucion.sobrios[posVehiculo]++;
+							solucion.asignaciones[persona] = posVehiculo;
+							solve(datos, solucion, posVehiculo, posPersona + 1, soluciones);
+							solucion.asignaciones[persona] = -1;
+							solucion.sobrios[posVehiculo]--;
+						}
+					}
+				}
+			}
+			solve(datos, solucion, posVehiculo + 1, posPersona, soluciones);
+		}
 (7) En caso de utilizar una generalización, explicar cómo se define el algoritmo final
 a partir de la misma, por inmersión.
-
+	int soluciones = 0;
+	tSol solucion;
+	for (int i = 0; i < datos.n_vehiculos; i++) {
+		solucion.ebrios[i] = 0;
+		solucion.sobrios[i] = 0;
+	}
+	for (int i = 0; i < datos.n_personas; i++) {
+		solucion.asignaciones[i] = -1;
+	}
+	solve(datos, solucion, 0, 0, soluciones);
 */
+typedef struct {
+	int sobrios[MAX_VEHICULOS];
+	int ebrios[MAX_VEHICULOS];
+} tSol;
 
-int num_asignaciones(const tDatos& datos) {
-	// A IMPLEMENTAR
+bool esViable(const tDatos& datos, const tSol& solucion) {
+	bool viable = true;
+	for (int vehiculo = 0; vehiculo < datos.n_vehiculos && viable; vehiculo++) {
+		//     No hay al menos un sobrio                           o el coche esta vacio
+		if (solucion.sobrios[vehiculo] <= 0 || (solucion.ebrios[vehiculo] + solucion.sobrios[vehiculo]) <= 0) {
+			viable = false;
+		}
+	}
+	return viable;
 }
 
+void solve(const tDatos& datos, tSol solucion, int& posPersona, int& soluciones) {
+	if (posPersona == datos.n_personas) { //Si ha pasado por todas las personas o vehiculos
+		if (esViable(datos, solucion)) {
+			soluciones++;
+		}
+	}else {
+		for (int persona = posPersona; persona < datos.n_personas; persona++) {
+			for (int posVehiculo = 0; posVehiculo < datos.n_vehiculos; posVehiculo++) {
+				int puestosOcupados = solucion.sobrios[posVehiculo] + solucion.ebrios[posVehiculo];
+				//Si hay plazas suficientes en el vehiculo se prueba alojar gente en este vehiculo
+				if (puestosOcupados < datos.capacidad[posVehiculo]) {
+					if (datos.ha_bebido[persona] && solucion.ebrios[posVehiculo] + 1 <= (datos.capacidad[posVehiculo] / 2)) { //Si ha bebido y al asignarlo no se supera el limite de ebrios
+						solucion.ebrios[posVehiculo]++;
+						posPersona++;
+						solve(datos, solucion, posPersona, soluciones);
+						posPersona--;
+						solucion.ebrios[posVehiculo]--;
+					}
+					else if (!datos.ha_bebido[persona]) { //Si la persona no ha bebido
+						solucion.sobrios[posVehiculo]++;
+						posPersona++;
+						solve(datos, solucion, posPersona, soluciones);
+						posPersona--;
+						solucion.sobrios[posVehiculo]--;
+					}
+				}
+			}
+		}
+	}
+}
+
+int num_asignaciones(const tDatos& datos) {
+	int soluciones = 0;
+	int posPersona = 0;
+	tSol solucion;
+	for (int i = 0; i < datos.n_vehiculos; i++) {
+		solucion.ebrios[i] = 0;
+		solucion.sobrios[i] = 0;
+	}
+	solve(datos, solucion, posPersona, soluciones);
+	return soluciones;
+}
 
 bool ejecuta() {
 	tDatos datos;
@@ -69,7 +161,6 @@ bool ejecuta() {
 	return true;
 
 }
-
 
 int main() {
 	while (ejecuta());
