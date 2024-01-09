@@ -42,8 +42,8 @@ parciales viables?
 a partir de la misma, por inmersion.
 
 */
-void solve(const tMatrizSatisfacciones& sats, int posHermano, const int limiteMalAsignados, tDatos datos, int& maxSatisfaccion, int& malAsignados, bool& estaHermano, int numNinio) {
-	if(numNinio == sats.n_ninios){
+void solve(const tMatrizSatisfacciones& sats, int posHermano, const int limiteMalAsignados, tDatos datos, int& maxSatisfaccion, int& malAsignados, bool& estaHermano, int numNinio, int puestosOcupados) {
+	if(numNinio == sats.n_ninios || puestosOcupados == sats.n_sitios){
 		//Para validar la solucion final comprobamos que este presente el hermano, y que la satisfaccion total de esta combinacion supere la maxima hallada hasta ahora
 		if (estaHermano && datos.sumaSatisfaccion > maxSatisfaccion) {
 			maxSatisfaccion = datos.sumaSatisfaccion;
@@ -72,7 +72,7 @@ void solve(const tMatrizSatisfacciones& sats, int posHermano, const int limiteMa
 					}
 					datos.asignaciones[sitio] = numNinio;
 					datos.sumaSatisfaccion += sats.sat[numNinio][sitio];
-					solve(sats, posHermano, limiteMalAsignados, datos, maxSatisfaccion, malAsignados, estaHermano, numNinio + 1); //Se llama a la recursion
+					solve(sats, posHermano, limiteMalAsignados, datos, maxSatisfaccion, malAsignados, estaHermano, numNinio + 1, puestosOcupados + 1); //Se llama a la recursion
 					//Deshacemos el marcaje
 					datos.asignaciones[sitio] = -1;
 					datos.sumaSatisfaccion -= sats.sat[numNinio][sitio];
@@ -87,19 +87,19 @@ void solve(const tMatrizSatisfacciones& sats, int posHermano, const int limiteMa
 			}
 		}
 		//Probamos a no invitar al ninio y pasamos al siguiente
-		solve(sats, posHermano, limiteMalAsignados, datos, maxSatisfaccion, malAsignados, estaHermano, numNinio + 1);
+		solve(sats, posHermano, limiteMalAsignados, datos, maxSatisfaccion, malAsignados, estaHermano, numNinio + 1, puestosOcupados);
 	}
 }
 
 int satisfaccion_maxima(const tMatrizSatisfacciones& sats, int h) {
 	tDatos datos;
-	int maxSatisfaccion = 0, malAsignados = 0, numNinio = 0, limiteMalAsignados = sats.n_sitios / 3;
+	int maxSatisfaccion = 0, malAsignados = 0, limiteMalAsignados = sats.n_sitios / 3;
 	bool estaHermano = false;
 	datos.sumaSatisfaccion = 0;
 	for (int i = 0; i < sats.n_sitios; i++) {
 		datos.asignaciones[i] = -1;
 	}
-	solve(sats, h, limiteMalAsignados, datos, maxSatisfaccion, malAsignados, estaHermano, numNinio);
+	solve(sats, h, limiteMalAsignados, datos, maxSatisfaccion, malAsignados, estaHermano, 0, 0);
 	return maxSatisfaccion;
 }
 
